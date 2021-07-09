@@ -1,0 +1,33 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "`/routes` — папка с файлами роутера  \r `/controllers` — папка с файлами контроллеров пользователя и карточки   \r `/models` — папка с файлами описания схем пользователя и карточки",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "eslint": "eslint",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbagaut/express-mesto.git"
+  },
+  "keywords": [],
+  "author": "Bagautdinov Marat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mbagaut/express-mesto/issues"
+  },
+  "homepage": "https://github.com/mbagaut/express-mesto#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.13.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.30.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
+    "nodemon": "^2.0.9"
+  }
+}
