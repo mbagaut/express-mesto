@@ -7,11 +7,16 @@ const getUser = (req, res) => {
   User.findById({ _id })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: userNotExist });
+        return res.status(404).send({ message: userNotExist });
       }
-      res.status(200).send({ data: user });
+      return res.status(200).send({ data: user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 const createUser = (req, res) => {
@@ -19,7 +24,12 @@ const createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.status(200).send({ user }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 const getUsers = (req, res) => {
@@ -37,11 +47,16 @@ const changeProfile = (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: userNotExist });
+        return res.status(404).send({ message: userNotExist });
       }
-      res.status(200).send({ data: user });
+      return res.status(200).send({ data: user });
     })
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 const changeAvatar = (req, res) => {
@@ -57,7 +72,12 @@ const changeAvatar = (req, res) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 module.exports = {

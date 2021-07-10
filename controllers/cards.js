@@ -8,7 +8,12 @@ const createCard = (req, res) => {
 
   Card.create({ name, link, owner: _id })
     .then((card) => res.status(200).send({ card }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 const getCards = (req, res) => {
@@ -21,9 +26,9 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: cardNotExist });
+        return res.status(404).send({ message: cardNotExist });
       }
-      res.status(200).send({ data: card });
+      return res.status(200).send({ data: card });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
@@ -32,22 +37,32 @@ const likeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: cardNotExist });
+        return res.status(404).send({ message: cardNotExist });
       }
-      res.status(200).send({ data: card });
+      return res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: cardNotExist });
+        return res.status(404).send({ message: cardNotExist });
       }
-      res.status(200).send({ data: card });
+      return res.status(200).send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.send({ message: err.message });
+      }
+      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
 };
 
 module.exports = {
