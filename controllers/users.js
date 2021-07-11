@@ -3,8 +3,8 @@ const User = require('../models/user');
 const userNotExist = 'Запрашиваемый пользователь не найден';
 
 const getUser = (req, res) => {
-  const { _id } = req.body;
-  User.findById({ _id })
+  const { userId } = req.params;
+  User.findById(userId)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: userNotExist });
@@ -13,7 +13,7 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
@@ -26,7 +26,7 @@ const createUser = (req, res) => {
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
@@ -53,7 +53,7 @@ const changeProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
@@ -74,7 +74,7 @@ const changeAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });

@@ -10,7 +10,7 @@ const createCard = (req, res) => {
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
@@ -43,7 +43,7 @@ const likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
@@ -59,7 +59,7 @@ const dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.send({ message: err.message });
+        return res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
