@@ -1,8 +1,10 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-error');
+const BadRequestError = require('../errors/bad-request-error');
+const InternalServerError = require('../errors/internal-server-error');
+const ForbiddenError = require('../errors/forbidden-error');
 
-const cardNotExist = 'Запрашиваемая карточка не найдена';
-
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { _id } = req.user;
   const { name, link } = req.body;
 
@@ -10,58 +12,71 @@ const createCard = (req, res) => {
     .then((card) => res.status(200).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: err.message });
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => next(new InternalServerError('Ошибка сервера')));
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: cardNotExist });
-      }
-      return res.status(200).send({ data: card });
+const deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
+    .orFail(() => {
+      throw new NotFoundError('Карточка по заданному id отсутствует в базе');
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
-};
-
-const likeCard = (req, res) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: cardNotExist });
+      if (req.user._id === card.owner.toHexString()) {
+        Card.deleteOne(card)
+          .then(() => res.status(200).send({ data: card }));
+      } else {
+        throw new ForbiddenError('Это чужая карточка, её нельзя удалить, но нам она тоже не нравится');
       }
-      return res.status(200).send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
+      if (err.statusCode === 404 || err.statusCode === 403) {
+        next(err);
+      } else {
+        next(new InternalServerError('Ошибка сервера'));
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 
-const dislikeCard = (req, res) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: cardNotExist });
-      }
-      return res.status(200).send({ data: card });
+const likeCard = (req, res, next) => {
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .orFail(() => {
+      throw new NotFoundError('Карточка по заданному id отсутствует в базе');
     })
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: err.message });
+        next(new BadRequestError(err.message));
+      } else if (err.statusCode === 404) {
+        next(err);
+      } else {
+        next(new InternalServerError('Ошибка сервера'));
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
+    });
+};
+
+const dislikeCard = (req, res, next) => {
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .orFail(() => {
+      throw new NotFoundError('Карточка по заданному id отсутствует в базе');
+    })
+    .then((card) => res.status(200).send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError(err.message));
+      } else if (err.statusCode === 404) {
+        next(err);
+      } else {
+        next(new InternalServerError('Ошибка сервера'));
+      }
     });
 };
 

@@ -21,8 +21,14 @@
   },
   "homepage": "https://github.com/mbagaut/express-mesto#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "celebrate": "^15.0.0",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "mongoose": "^5.13.2"
+    "joi": "^17.4.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.2",
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "eslint": "^7.30.0",
