@@ -26,10 +26,12 @@ const getUser = (req, res, next) => {
 };
 
 const passwordValidator = (obj, password) => {
-  let errorMessages = [];
-  for (let prop in obj) {
-    obj[prop].regex.test(password) ? false : errorMessages.push(obj[prop].message);
-  }
+  const errorMessages = [];
+
+  Object.keys(obj).forEach((prop) => (
+    obj[prop].regex.test(password) ? false : errorMessages.push(obj[prop].message)
+  ));
+
   return errorMessages.length > 0 ? errorMessages : true;
 };
 
@@ -75,26 +77,19 @@ const createUser = (req, res, next) => {
         password: hash,
       }))
       .then((user) => {
-        const {
-          _id,
-          email,
-          name,
-          about,
-          avatar,
-        } = user;
         res.status(201).send({
-          _id,
-          email,
-          name,
-          about,
-          avatar,
+          _id: user._id,
+          email: user.email,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
         });
       })
       .catch((err) => {
         if (err.name === 'ValidationError' || err.name === 'CastError') {
           next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
         } else if (err.name === 'MongoError' && err.code === 11000) {
-          next(new ConflictError(err.message));
+          next(new ConflictError('Данная почта уже зарегистрирована'));
         } else {
           next(new InternalServerError('Ошибка сервера'));
         }

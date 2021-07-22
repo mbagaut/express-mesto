@@ -13,7 +13,7 @@ router.get('/users', getUsers);
 router.get('/users/me', getMyData);
 router.get('/users/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    userId: Joi.string().length(24).hex(),
   }),
 }), getUser);
 router.patch('/users/me', celebrate({
@@ -24,7 +24,7 @@ router.patch('/users/me', celebrate({
 }), changeProfile);
 router.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().min(6),
+    avatar: Joi.string().required().pattern(new RegExp(/^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/)),
   }),
 }), changeAvatar);
 

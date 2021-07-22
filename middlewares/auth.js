@@ -3,14 +3,13 @@ const UnauthorizedError = require('../errors/unauthorized-error');
 const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
+  const { jwt: token } = req.cookies;
 
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  if (!token) {
     throw new UnauthorizedError('Необходима авторизация');
   }
-  const token = authorization.replace('Bearer ', '');
   let payload;
-  const { JWT_SECRET } = process.env;
+  const { JWT_SECRET = 123456789101112131415161718192021222324252627282930313 } = process.env;
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
