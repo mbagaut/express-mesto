@@ -57,7 +57,7 @@ app.use((req, res, next) => {
 // обработчик ошибок celebrate
 app.use(errors());
 // централизованный обработчик
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
   } else {

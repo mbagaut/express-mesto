@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const UnauthorizedError = require('../errors/unauthorized-error');
-const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports = (req, res, next) => {
   const { jwt: token } = req.cookies;
@@ -9,11 +8,11 @@ module.exports = (req, res, next) => {
     throw new UnauthorizedError('Необходима авторизация');
   }
   let payload;
-  const { JWT_SECRET = 123456789101112131415161718192021222324252627282930313 } = process.env;
+  const { JWT_SECRET = 'dev-secret' } = process.env;
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    throw new ForbiddenError('У вас нет прав доступа');
+    throw new UnauthorizedError('Необходима авторизация');
   }
   req.user = payload;
 
